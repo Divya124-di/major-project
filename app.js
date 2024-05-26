@@ -18,9 +18,21 @@ const listingRouter = require("./routes/listing.js");
 const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
 
+//const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
 
 
 const dbUrl = process.env.ATLASDB_URL;
+const secret = process.env.SECRET;
+
+if (!dbUrl) {
+  throw new Error("ATLASDB_URL is not set in environment variables");
+}
+if (!secret) {
+  throw new Error("SECRET is not set in environment variables");
+}
+
+console.log("Database URL:", dbUrl);
+console.log("Secret:", secret);
 
 main()
   .then(() => {
@@ -34,43 +46,40 @@ async function main() {
   await mongoose.connect(dbUrl);
 }
 
-app.set('view engine', "ejs");
+app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
-//console.log(path.join(__dirname, "views"));D:\project\views
-app.use(express.urlencoded({extended: true}));
+// console.log(path.join(__dirname, "views"));D:\project\views
+app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 app.engine("ejs", engine);
 app.use(express.static(path.join(__dirname, "public")));
 
-const store = MongoStore.create({
-  mongoUrl: dbUrl,
-  crypto: {
-    secret: process.env.SECRET,
-  },
-  touchAfter: 24 * 60 * 60,
-});
+// const store = MongoStore.create({
+//   mongoUrl: dbUrl,
+//   crypto: {
+//     secret: secret,
+//   },
+//   touchAfter: 24 * 60 * 60,
+// });
 
-store.on("error", ()=> {
-  console.log("Error in  mongo session store ",err);
-});
+// store.on("error", (err) => {
+//   console.log("Error in mongo session store", err);
+// });
 
 const sessionOptions = {
-  store,
-  secret: process.env.SECRET,
+  // store,
+  secret: secret,
   resave: false,
   saveUninitialized: true,
   cookie: {
-    expeires: Date.now() + 7 * 24 * 60 * 60 * 1000,
+    expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
     maxAge: 7 * 24 * 60 * 60 * 1000,
-    httpOnly: true
+    httpOnly: true,
   },
 };
 
-// app.get("/", (req, res) => {
-//   res.send("i m a root");
-// });
-
 app.use(session(sessionOptions));
+
 app.use(flash());
 
 app.use(passport.initialize());
