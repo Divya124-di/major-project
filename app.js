@@ -54,20 +54,20 @@ app.use(methodOverride("_method"));
 app.engine("ejs", engine);
 app.use(express.static(path.join(__dirname, "public")));
 
-// const store = MongoStore.create({
-//   mongoUrl: dbUrl,
-//   crypto: {
-//     secret: secret,
-//   },
-//   touchAfter: 24 * 60 * 60,
-// });
+const store = MongoStore.create({
+  mongoUrl: dbUrl,
+  crypto: {
+    secret: secret,
+  },
+  touchAfter: 24 * 60 * 60,
+});
 
-// store.on("error", (err) => {
-//   console.log("Error in mongo session store", err);
-// });
+store.on("error", (err) => {
+  console.log("Error in mongo session store", err);
+});
 
 const sessionOptions = {
-  // store,
+  store,
   secret: secret,
   resave: false,
   saveUninitialized: true,
